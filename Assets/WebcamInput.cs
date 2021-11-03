@@ -18,7 +18,7 @@ public class WebcamInput : MonoBehaviour
       }
     }
 
-    [SerializeField] Vector2Int _resolution = new Vector2Int(1024, 1024);
+    [SerializeField] Vector2Int _resolution = new Vector2Int(1920, 1080);
     [SerializeField] RawImage processedImage;
     [SerializeField] ComputeShader blendShader;
 
@@ -50,19 +50,17 @@ public class WebcamInput : MonoBehaviour
         if (_webcamTexture != null) Destroy(_webcamTexture);
         if (_tmpRenderTexture1 != null) Destroy(_tmpRenderTexture1);
         if (_tmpRenderTexture2 != null) Destroy(_tmpRenderTexture2);
+        for (int i = 0; i < renderTextures.Count; i++)
+        {
+          var tex = renderTextures[i];
+          renderTextures.Remove(tex);
+          Destroy(tex);
+        }
     }
 
     void Update()
     {
         if (!_webcamTexture.didUpdateThisFrame) return;
-
-        var aspect1 = (float)_webcamTexture.width / _webcamTexture.height;
-        var aspect2 = (float)_resolution.x / _resolution.y;
-        var gap = aspect2 / aspect1;
-
-        var vflip = _webcamTexture.videoVerticallyMirrored;
-        var scale = new Vector2(gap, vflip ? -1 : 1);
-        var offset = new Vector2((1 - gap) / 2, vflip ? 1 : 0);
 
         var kernelIndex = blendShader.FindKernel("CSMain");
         ThreadSize threadSize = new ThreadSize();
